@@ -7,6 +7,7 @@ Author: Lukas Elflein <elfleinl@cs.uni-freiburg.de>
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def exponential(x, rate=0.3, cutoff=10):
 	"""Exponential distribution."""
 	return rate * np.exp(-1 * rate * x)
@@ -85,7 +86,7 @@ def plot_dist(histogram, name, reference_distribution=None):
 	if reference_distribution is not None:
 		ref = reference_distribution(centers)
 		ref /= sum(ref)
-		ax.plot(centers, ref, color='red', marker='o', label='Reference distribution')
+		ax.plot(centers, ref, color='red', marker='o', label='Target distribution')
 
 	plt.title(name)
 	plt.legend()
@@ -121,7 +122,7 @@ def quartile_function(distribution, p, support=None):
 	return x
 
 
-def quartile_sampler(distribution, support):
+def inversion_sampler(distribution, support):
 	"""Wrapper for quartile_function."""
 	# z is distributed according to the given distribution
 	# To approximate this, we insert an atom with probablity dis(z) at place z.
@@ -177,7 +178,7 @@ def generate_structure(distribution, box=np.array([10, 10, 10])):
 	support = {}
 	# Using the box parameter, we construct a grid inside the box
 	# With gridpoints every 0.1 units:
-	grid_density = 1
+	grid_density = 0.1
 	# This results in a 100x100x100 grid:
 	support['x'] = np.arange(0, box[0], grid_density)
 	support['y'] = np.arange(0, box[1], grid_density)
@@ -196,18 +197,27 @@ def generate_structure(distribution, box=np.array([10, 10, 10])):
 	atom_positions = np.array(atom_positions)
 
 	return atom_positions
+
+
+def export_xyz(struc):
+	"""Export atom structure to .xyz file format."""
+	np.savetxt('distributed_atom_structure.xyz', struc)
 	
 
 def main():
-	"""Generate an example structure, plot the distributions in this example."""
+	"""Generate and export an atomic structure, and plot its distribution"""
+
+	print('This is `{}`.'.format(__file__))
+	print('Generating structure from distribution ...')
 	struc = generate_structure(exponential)
+
+	print('Plotting distribution histograms ...')
 	histx, histy, histz = get_histogram(struc)
-	h = get_histogram(struc)
-	
 	plot_dist(histz, 'z', reference_distribution=exponential)
 	plot_dist(histx, 'x', reference_distribution=uniform)
 	plot_dist(histy, 'y', reference_distribution=uniform)
 
+	print('Done.')
 
 if __name__ == '__main__':
 	# Run doctests
