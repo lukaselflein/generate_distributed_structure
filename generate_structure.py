@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def exponential(x, rate=0.3, cutoff=10):
+def exponential(x, rate=0.1):
 	"""Exponential distribution."""
 	return rate * np.exp(-1 * rate * x)
 
@@ -59,14 +59,15 @@ def get_nearest_pos(array, value):
 	return pos
 
 
-def get_histogram(struc, bins=np.arange(0, 11)):
+def get_histogram(struc, box):
 	"""Slice the list of atomic positions, aggregate positions into histogram."""
 	# Extract x/y/z positions only
 	x, y, z = struc[:, 0], struc[:, 1], struc[:, 2]
 
 	histograms = []	
-	for dimension_position in (x, y, z):
-		hist, bins = np.histogram(dimension_position, bins=bins, density=True)
+	for dimension in (0, 1, 2):
+		bins = np.arange(0, box[dimension])
+		hist, bins = np.histogram(struc[:, dimension], bins=bins, density=True)
 		# Normalize the histogram for all values to sum to 1
 		hist /= sum(hist)
 
@@ -86,7 +87,7 @@ def plot_dist(histogram, name, reference_distribution=None):
 	if reference_distribution is not None:
 		ref = reference_distribution(centers)
 		ref /= sum(ref)
-		ax.plot(centers, ref, color='red', marker='o', label='Target distribution')
+		ax.plot(centers, ref, color='red', label='Target distribution')
 
 	plt.title(name)
 	plt.legend()
@@ -159,7 +160,7 @@ def rejection_sampler(distribution, support, max_tries=1000):
 	raise RuntimeError('Maximum of attempts max_tries {} exceeded!'.format(max_tries))
 	
 
-def generate_structure(distribution, box=np.array([10, 10, 10])):
+def generate_structure(distribution, box=np.array([50, 50, 100])):
 	"""Generate an atomic structure.
 	
 	Z coordinates are distributed according to the given distribution.
@@ -171,14 +172,14 @@ def generate_structure(distribution, box=np.array([10, 10, 10])):
 	Arguments:
 
 	"""
-	atom_count = 50000
+	atom_count = 100
 	atom_positions = []
 
 	# We define which positions in space the atoms can be placed
 	support = {}
 	# Using the box parameter, we construct a grid inside the box
 	# With gridpoints every 0.1 units:
-	grid_density = 0.1
+	grid_density = 1
 	# This results in a 100x100x100 grid:
 	support['x'] = np.arange(0, box[0], grid_density)
 	support['y'] = np.arange(0, box[1], grid_density)
@@ -201,7 +202,25 @@ def generate_structure(distribution, box=np.array([10, 10, 10])):
 
 def export_xyz(struc):
 	"""Export atom structure to .xyz file format."""
-	np.savetxt('distributed_atom_structure.xyz', struc)
+
+	# We have as many atoms as coordinate positions
+	n_atoms = struc.shape[0]
+
+	with open('distributed_atom_structure.xyz', 'w') as outfile:
+		outfile.write('{}\n'.format(n_atoms))
+		# Add Lattice information
+		comment = 'Lattice="'
+		R_1 = '50.0 0.0 0.0'
+		R_2 = ' 0.0 50.0 0.0' 
+		R_3 = ' 0.0 0.0 100.0'
+		comment += R_1 + R_2 + R_3 + '"'
+		comment += '\n'
+		outfile.write(comment)
+
+		for line in struc:
+			x, y, z = line
+			out_line = 'Na {} {} {}\n'.format(x, y, z)
+			outfile.write(out_line)
 	
 
 def main():
@@ -209,13 +228,17 @@ def main():
 
 	print('This is `{}`.'.format(__file__))
 	print('Generating structure from distribution ...')
-	struc = generate_structure(exponential)
+	box = np.array([50, 50, 100])
+	struc = generate_structure(distribution=exponential, box=box)
 
 	print('Plotting distribution histograms ...')
-	histx, histy, histz = get_histogram(struc)
+	histx, histy, histz = get_histogram(struc, box=box)
 	plot_dist(histz, 'z', reference_distribution=exponential)
 	plot_dist(histx, 'x', reference_distribution=uniform)
 	plot_dist(histy, 'y', reference_distribution=uniform)
+
+	print('Exporting ...')
+	export_xyz(struc)
 
 	print('Done.')
 
