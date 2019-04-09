@@ -82,7 +82,8 @@ def plot_dist(histogram, name, reference_distribution=None):
 	centers = get_centers(bins)
 
 	fi, ax = plt.subplots()
-	ax.bar(centers, hist, align='center', width=width, label='Empirical distribution')
+	ax.bar(centers, hist, align='center', width=width, label='Empirical distribution',
+	       edgecolor="white")
 
 	if reference_distribution is not None:
 		ref = reference_distribution(centers)
