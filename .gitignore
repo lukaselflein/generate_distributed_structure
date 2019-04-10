@@ -107,3 +107,4 @@ venv.bak/
 *.png
 *.xyz
 *.pdb
+env
