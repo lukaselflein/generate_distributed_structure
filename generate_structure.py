@@ -59,14 +59,14 @@ def get_nearest_pos(array, value):
 	return pos
 
 
-def get_histogram(struc, box):
+def get_histogram(struc, box, n_bins=100):
 	"""Slice the list of atomic positions, aggregate positions into histogram."""
 	# Extract x/y/z positions only
 	x, y, z = struc[:, 0], struc[:, 1], struc[:, 2]
 
 	histograms = []	
 	for dimension in (0, 1, 2):
-		bins = np.arange(0, box[dimension])
+		bins = np.linspace(0, box[dimension], n_bins)
 		hist, bins = np.histogram(struc[:, dimension], bins=bins, density=True)
 		# Normalize the histogram for all values to sum to 1
 		hist /= sum(hist)
@@ -78,12 +78,12 @@ def get_histogram(struc, box):
 def plot_dist(histogram, name, reference_distribution=None):
 	"""Plot histogram with an optional reference distribution."""
 	hist, bins = histogram
-	width = 0.95 * (bins[1] - bins[0])
+	width = 1 * (bins[1] - bins[0])
 	centers = get_centers(bins)
 
 	fi, ax = plt.subplots()
 	ax.bar(centers, hist, align='center', width=width, label='Empirical distribution',
-	       edgecolor="white")
+	       edgecolor="none")
 
 	if reference_distribution is not None:
 		ref = reference_distribution(centers)
@@ -92,7 +92,7 @@ def plot_dist(histogram, name, reference_distribution=None):
 
 	plt.title(name)
 	plt.legend()
-	plt.xlabel('Distance ' + name)
+	plt.xlabel('Distance ' + name + ' [arbitrary units]')
 	plt.savefig(name + '.png')
 
 
@@ -135,7 +135,7 @@ def inversion_sampler(distribution, support):
 	return sample
 
 
-def rejection_sampler(distribution, support, max_tries=1000):
+def rejection_sampler(distribution, support, max_tries=10000):
 	"""Sample distribution by drawing from support and keeping according to distribution.
 	
 	Draw a random sample from our support, and keep it if another random number is
@@ -161,7 +161,7 @@ def rejection_sampler(distribution, support, max_tries=1000):
 	raise RuntimeError('Maximum of attempts max_tries {} exceeded!'.format(max_tries))
 	
 
-def generate_structure(distribution, box=np.array([50, 50, 100])):
+def generate_structure(distribution, box=np.array([50, 50, 100]), atom_count=100, n_gridpoints=100):
 	"""Generate an atomic structure.
 	
 	Z coordinates are distributed according to the given distribution.
@@ -173,18 +173,15 @@ def generate_structure(distribution, box=np.array([50, 50, 100])):
 	Arguments:
 
 	"""
-	atom_count = 100
 	atom_positions = []
 
 	# We define which positions in space the atoms can be placed
 	support = {}
 	# Using the box parameter, we construct a grid inside the box
-	# With gridpoints every 0.1 units:
-	grid_density = 1
 	# This results in a 100x100x100 grid:
-	support['x'] = np.arange(0, box[0], grid_density)
-	support['y'] = np.arange(0, box[1], grid_density)
-	support['z'] = np.arange(0, box[2], grid_density)
+	support['x'] = np.linspace(0, box[0], n_gridpoints)
+	support['y'] = np.linspace(0, box[1], n_gridpoints)
+	support['z'] = np.linspace(0, box[2], n_gridpoints)
 	
 	# For every atom, draw random x, y and z coordinates
 	for i in range(atom_count + 1):
