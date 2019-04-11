@@ -14,3 +14,8 @@ Lubricant molecules are charged, and their distribution is described by the Pois
 ### Simulating the structure
 To incorporate these results into our lubricant simulation, we need to sample the correct distribution.
 Then we need to transform these samples into the correct file formats and feed them into a Molecular Dynamics simulation.
+
+### Content
+* `showcase_poisson_bolzmann.ipynb`: A working example
+* `generate_structure.py`: Sampling and plotting
+* `poisson_bolzmann_distribution.py`: generate potential and densities
