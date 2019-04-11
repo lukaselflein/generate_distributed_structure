@@ -6,6 +6,8 @@ In order to understand lubrication better, we simulate thin layers of lubricant 
 Different structures of lubricant films are created by varying parameters like their concentration and the charge of the surface.
 The lubricant is somewhat solvable in water, thus parts of the film will diffuse into the bulk water.
 
+![pic](https://i.ibb.co/Yh8DxVM/showpicture.png)
+
 ### Physical solution
 Lubricant molecules are charged, and their distribution is described by the Poisson-Bolzmann equation.
 
