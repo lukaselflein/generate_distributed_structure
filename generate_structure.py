@@ -15,7 +15,7 @@ def exponential(x, rate=0.1):
 
 def uniform(x, *args, **kwargs):
 	"""Uniform distribution."""
-	return np.ones(x.shape)
+	return np.ones(x.shape) / 2
 
 
 def test():
@@ -92,7 +92,7 @@ def plot_dist(histogram, name, reference_distribution=None):
 
 	plt.title(name)
 	plt.legend()
-	plt.xlabel('Distance ' + name + ' [arbitrary units]')
+	plt.xlabel('Distance ' + name)
 	plt.savefig(name + '.png')
 
 
@@ -198,7 +198,7 @@ def generate_structure(distribution, box=np.array([50, 50, 100]), atom_count=100
 	return atom_positions
 
 
-def export_xyz(struc):
+def export_xyz(struc, atom_name='Na'):
 	"""Export atom structure to .xyz file format."""
 
 	# We have as many atoms as coordinate positions
@@ -217,9 +217,46 @@ def export_xyz(struc):
 
 		for line in struc:
 			x, y, z = line
-			out_line = 'Na {} {} {}\n'.format(x, y, z)
+			out_line = '{} {} {} {}\n'.format(atom_name, x, y, z)
 			outfile.write(out_line)
+
+
+def export_named_struc(struc):
+	"""Export atom structure to .xyz file format.
+
+	Arguments
+	named_struc: list of atom names and positions, with lines like e.g. Na 1.2 5.1 4.2
+	"""
+
+	# We have as many atoms as coordinate positions
+	n_atoms = struc.shape[0]
+
+	with open('distributed_atom_structure.xyz', 'w') as outfile:
+		outfile.write('{}\n'.format(n_atoms))
+		comment = '\n'
+		outfile.write(comment)
+
+		for line in struc:
+			atom_name, x, y, z = line
+			out_line = '{} {} {} {}\n'.format(atom_name, x, y, z)
+			outfile.write(out_line)
+
+
+def concat_names_structs(struc_list, name_list):
+	"""Append individual structure objects and name each line."""
+	assert len(struc_list) == len(name_list)
 	
+	concated_list = []
+	for i in range(len(struc_list)):
+		atom_name = name_list[i]
+
+		for line in struc_list[i]:
+			x, y, z = line
+			concated_list += [[atom_name, x, y, z]]
+
+	return np.array(concated_list)
+		
+
 
 def main():
 	"""Generate and export an atomic structure, and plot its distribution"""
