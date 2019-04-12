@@ -21,6 +21,9 @@ Then we need to transform these samples into the correct file formats and feed t
 * `poisson_bolzmann_distribution.py`: generate potential and densities
 
 ### Usage
+So far, most scripts are not meant as standalone programs.
+For usage examples have a look at the notebooks, `showcase_poisson_bolzman_distribution.ipynb` is a good candidate.
+
 If you can't get the notebooks to run of the box, set up an environment for them:
 ```bash
 mkdir env
