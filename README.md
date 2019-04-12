@@ -19,3 +19,14 @@ Then we need to transform these samples into the correct file formats and feed t
 * `showcase_poisson_bolzmann.ipynb`: A working example
 * `generate_structure.py`: Sampling and plotting
 * `poisson_bolzmann_distribution.py`: generate potential and densities
+
+### Usage
+If you can't get the notebooks to run of the box, set up an environment for them:
+```bash
+mkdir env
+virtualenv env
+source env/bin/activate
+ipython kernel install --user --name=new_kernel
+jupyter notebook showcase_poisson_bolzman_distribution.ipynb
+```
+And then choose `new_kernel` in the top right dropdown menu as a kernel.
