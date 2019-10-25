@@ -27,15 +27,15 @@ def debye(rho_bulk, charge, permittivity=79, temperature=298.15):
 
 	Example: the Debye length of 10^-4 M salt water is 30.4 nm.
 	>>> density = sc.Avogadro * 1000 * 10**-4
-	>>> rho = {'Na': density, 'Cl': density} 
+	>>> rho = {'Na': density, 'Cl': density}
 	>>> charge = {'Na': 1, 'Cl': -1}
 	>>> deb = debye(rho_bulk=rho, charge=charge) * 10**9
 	>>> deb - 30.4 < 0.5
-	True    
+	True
 	"""
 	# The numerator of the expression in the square root
 	# e_r * e_0 * k_B * T
-	numerator = permittivity * sc.epsilon_0 * sc.Boltzmann * temperature     
+	numerator = permittivity * sc.epsilon_0 * sc.Boltzmann * temperature
 
 	# The divisor of the expression in the square root
 	# \sum_i rho_i e^2 z_i^2
@@ -71,7 +71,7 @@ def potential(location, rho_bulk, charge, surface_potential, temperature=300, pe
 
 	Arguments:
 	location: z-distance from the surface [m]
-	temperature: Temperature of the soultion [Kelvin] 
+	temperature: Temperature of the soultion [Kelvin]
 	gamma: term from Gouy-Chapmann theory
 	kappa: the inverse of the debye length
 	charge: dictionary of the charge of each ionic species
@@ -92,18 +92,18 @@ def potential(location, rho_bulk, charge, surface_potential, temperature=300, pe
 	kappa = 1/debye_value
 
 	# We also need to evaluate the gamma function
-	gamma_value =  decimal.Decimal(gamma(surface_potential=surface_potential, temperature=temperature))    
+	gamma_value =  decimal.Decimal(gamma(surface_potential=surface_potential, temperature=temperature))
 
 	# The e^{-kz} term
 	exponential = decimal.Decimal(np.exp(-kappa * location))
-	
+
 	# The fraction inside the log
 	numerator = decimal.Decimal(1) + gamma_value * exponential
 	divisor =   decimal.Decimal(1) - gamma_value * exponential
 
 	# This is the complete term for the potential
 	psi = prefactor * (numerator / divisor).ln()
-	
+
 	# Convert to float again for better handling in plotting etc.
 	psi = float(psi)
 
@@ -113,7 +113,7 @@ def potential(location, rho_bulk, charge, surface_potential, temperature=300, pe
 def charge_density(location, rho_bulk, charge, surface_potential, temperature=300, permittivity=80, species='Na'):
 	"""The density of ions near a charged surface.
 
-	Calculates the number density of ions of a species, at a distance of "location" 
+	Calculates the number density of ions of a species, at a distance of "location"
 	away from a metal/solution interface. The metal is charged, and thus the density
 	is not homogeneous but higher (lower) than bulk concentration for opposite (equally)
 	charged ions, converging to the bulk concentration at high distances.
@@ -125,7 +125,7 @@ def charge_density(location, rho_bulk, charge, surface_potential, temperature=30
 	surface_potential: eletrostatic potential at the metal/liquid interface [V]
 	temperature: Temperature of the solution [K]
 	permittivity: relative permittivity of the ionic solution, 80 for water [1]
-	species: the atom name the density shoul be calculated for. 
+	species: the atom name the density shoul be calculated for.
 		 Must be contained in `rho_bulk` and `charge`.
 
 	Returns:

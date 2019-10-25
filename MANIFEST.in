@@ -1,0 +1,2 @@
+include versioneer.py
+include continuous2discrete/_version.py
